@@ -1,0 +1,83 @@
+"```
+#include <iostream>
+#include <vector>
+#include <random>
+#include <functional>
+#include <ctime>
+
+// A dynamic matrix multiplier in C++
+
+class Matrix
+{
+public:
+    Matrix(int rows, int cols) : rows_(rows), cols_(cols)
+    {
+        elems_.resize(rows * cols);
+        std::default_random_engine generator(static_cast<unsigned int>(time(nullptr)));
+        std::uniform_int_distribution<int> distribution(1, 100);
+        std::function random = std::bind(distribution, generator);
+        for (int i = 0; i < rows * cols; ++i)
+        {
+            elems_[i] = random();
+        }
+    }
+
+    int rows() const { return rows_; }
+    int cols() const { return cols_; }
+    int at(int row, int col) const { return elems_[row * cols_ + col]; }
+    int& edit(int row, int col) { return elems_[row * cols_ + col]; }
+
+    // Matrix multiplication
+    Matrix operator*(const Matrix& other) const
+    {
+        if (cols_ != other.rows_)
+        {
+            throw std::invalid_argument(""Invalid matrix dimensions for multiplication"");
+        }
+        Matrix result(rows_, other.cols_);
+        for (int r = 0; r < rows_; ++r)
+        {
+            for (int c = 0; c < other.cols_; ++c)
+            {
+                int sum = 0;
+                for (int k = 0; k < cols_; ++k)
+                {
+                    sum += at(r, k) * other.at(k, c);
+                }
+                result.edit(r, c) = sum;
+            }
+        }
+        return result;
+    }
+
+private:
+    int rows_, cols_;
+    std::vector<int> elems_;
+};
+
+int main()
+{
+    try
+    {
+        Matrix A(3, 4);
+        Matrix B(4, 2);
+
+        Matrix C = A * B;
+        std::cout << ""The product of the randomly generated matrices A and B is:\n"";
+        for (int r = 0; r < C.rows(); ++r)
+        {
+            for (int c = 0; c < C.cols(); ++c)
+            {
+                std::cout << C.at(r, c) << ' ';
+            }
+            std::cout << '\n';
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << ""Error: "" << e.what() << '\n';
+        return 1;
+    }
+    return 0;
+}
+```"
